@@ -1,0 +1,21 @@
+{
+  "key": "jirometer",
+  "name": "jirometer",
+  "description": "Demo JIRA / Clojure integration",
+  "baseUrl": "https://e02e7099b8dc.ngrok.io",
+  "authentication": {
+    "type": "jwt"
+  },
+  "lifecycle": {
+    "installed": "/installed"
+  },
+  "modules": {
+    "webhooks": [
+      {
+        "event": "*",
+        "url": "/recv"
+      }
+    ]
+  },
+  "scopes": ["READ"]
+}
