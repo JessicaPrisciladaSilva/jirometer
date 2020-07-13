@@ -1,8 +1,13 @@
 (ns jirometer.core
-  (:require [rum.core :refer [defc mount]]))
+  (:require [rum.core :refer [defc mount]]
+            [ajax.core :refer [GET]]))
 
 (defc heading []
   [:h1 "JIRA Activity Feed"])
+
+(defn fetch-issues
+  [handler]
+  (GET "/events" {:handler handler :response-format :json :keywords? true}))
 
 (defc issue
   [{:keys [id summary type timestamp]}]
@@ -18,8 +23,6 @@
   [:div.issues
    (map issue is)])
 
-(def fake-issues '({:id "FOO-1" :summary "The Title" :type "jira:issue_updated" :timestamp 123456789}))
-
 (defc content
   [data]
   [:div.container
@@ -28,4 +31,12 @@
      (issues data)
      [:div "No activity found in feed."])])
 
-(mount (content fake-issues) (.getElementById js/document "content"))
+(defn handler [data]
+  (mount (content data) (.getElementById js/document "content")))
+
+
+(fetch-issues handler)
+
+(js/setInterval
+ #(fetch-issues handler)
+ 5000)
