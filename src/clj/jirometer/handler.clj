@@ -3,7 +3,8 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
             [ring.middleware.resource :refer [wrap-resource]]
-            [ring.util.response :refer [response]]))
+            [ring.util.response :refer [response]]
+            [org.httpkit.client :as http]))
 
 (def event-store (atom '()))
 
