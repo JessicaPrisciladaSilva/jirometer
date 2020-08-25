@@ -1,5 +1,6 @@
 (ns jirometer.handler
-  (:require [compojure.core :refer :all]
+  (:require [cheshire.core :as cheshire]
+            [compojure.core :refer :all]
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [ring.middleware.json :refer [wrap-json-body wrap-json-response]]
             [ring.middleware.resource :refer [wrap-resource]]
@@ -10,10 +11,10 @@
 
 (defn persist!
   "Save event to local in-memory structure"
-  [e]
-  (swap! event-store conj e)
-  (println e) ;; debug info for development
-  e)
+  [event]
+  (swap! event-store conj event)
+  (println event) ;; debug info for development
+  event)
 
 (defn transform
   "Get the fields we care about from the JIRA payload"
@@ -43,8 +44,14 @@
   (handle-event (:body req))
   {:status 200 :body "OK"})
 
+(defn print-installed
+  "Handler function for all events"
+  [req]
+  (println req)
+  {:status 200 :body "OK"})
+
 (defroutes app-routes
-           (POST "/installed" [] {:status 200 :body "OK"})
+           (POST "/installed" req (print-installed req))
            (POST "/recv" req (recv req))
            (GET "/events" req (response (events req))))
 
@@ -54,3 +61,26 @@
       wrap-json-body
       wrap-json-response
       (wrap-defaults api-defaults)))
+
+(defn issue
+  [issue]
+    (let [issue-info (http/request {:url        (str "https://jirometer.atlassian.net/rest/api/3/issue/" issue)
+                                  :method     :get
+                                  :basic-auth ["user" "password"]})]
+    (:body @issue-info)))
+
+(defn translate-field
+  []
+  (let [response (http/request {:url        "https://jirometer.atlassian.net/rest/api/2/field"
+                                :method     :get
+                                :basic-auth ["user" "password"]})
+        fields   (cheshire/parse-string (:body @response))]
+    fields))
+
+
+(defn epics
+  []
+  (let [response (http/request {:url        "https://jirometer.atlassian.net/rest/api/3/issue/search?jql=issueType=Epic"
+                                :method     :get
+                                :basic-auth ["user" "password"]})]
+    (:body @response)))

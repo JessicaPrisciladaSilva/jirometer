@@ -10,7 +10,8 @@
                  [rum "0.12.3"]
                  [clj-connect "0.2.4"]
                  [cljs-ajax "0.7.5"]
-                 [http-kit "2.3.0"]]
+                 [http-kit "2.3.0"]
+                 [cheshire "5.10.0"]]
   :plugins [[lein-ring "0.12.5"]
             [lein-figwheel "0.5.20"]]
   :ring {:handler jirometer.handler/app}
